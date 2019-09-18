@@ -67,6 +67,31 @@ namespace engine {
 	};
 
 	class Sigmoid : public Node {
+	public:
+		Sigmoid(Node* node);
 
+		virtual void forward(const Eigen::MatrixXf& value);
+		virtual void backward();
+
+	private:
+		Eigen::MatrixXf _impl(const Eigen::MatrixXf& x);
+
+	private:
+		Node* _node = nullptr;
+		//sigmoidµÄÆ«µ¼
+		Eigen::MatrixXf _partial;
+	};
+
+	class MSE : public Node {
+	public:
+		MSE(Node* y, Node* y_hat);
+
+		virtual void forward(const Eigen::MatrixXf& value);
+		virtual void backward();
+
+	private:
+		Node* _y;
+		Node* _y_hat;
+		Eigen::MatrixXf _diff;
 	};
 }
