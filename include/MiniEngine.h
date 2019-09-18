@@ -1,5 +1,4 @@
 #pragma once
-#include <any>
 #include <string>
 #include <vector>
 #include <map>
@@ -22,7 +21,7 @@ namespace engine {
 		}
 		virtual ~Node() {}
 
-		virtual void forward(const std::any& value) = 0;
+		virtual void forward(const Eigen::MatrixXf& value) = 0;
 
 		virtual void backward() = 0;
 
@@ -57,7 +56,7 @@ namespace engine {
 	public:
 		Linear(Node* nodes, Node* weights, Node* bias);
 
-		virtual void forward(const std::any& value);
+		virtual void forward(const Eigen::MatrixXf& value);
 
 		virtual void backward();
 
@@ -65,6 +64,9 @@ namespace engine {
 		Node* _nodes = nullptr;
 		Node* _weights = nullptr;
 		Node* _bias = nullptr;
+	};
+
+	class Sigmoid : public Node {
 
 	};
 }

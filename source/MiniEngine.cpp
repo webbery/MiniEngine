@@ -26,7 +26,7 @@ namespace engine {
 	{
 	}
 
-	void Linear::forward(const std::any& )
+	void Linear::forward(const Eigen::MatrixXf& )
 	{
 		_value = _nodes->getValue() * _weights->getValue() + _bias->getValue();
 	}
