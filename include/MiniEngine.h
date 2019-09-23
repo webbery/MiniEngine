@@ -9,12 +9,20 @@
 #include <Eigen/Core>
 #endif
 
+#ifdef MiniEngine_EXPORTS
+#define DLL_EXPORT __declspec(dllexport)
+#else
+#define DLL_EXPORT __declspec(dllimport)
+#endif
+
 namespace engine {
-	class Node {
+	class DLL_EXPORT Node {
 	public:
 		Node() {}
 
-		Node(const std::vector<Node*>& inputs) {
+		Node(const std::vector<Node*>& inputs)
+		:_inputs(inputs)
+		{
 			for (auto node : inputs) {
 				node->addNode2Output(this);
 			}
@@ -31,15 +39,19 @@ namespace engine {
 	public:
 		void addNode2Output(Node* pNode) { _outputs.emplace_back(pNode); }
 		Eigen::MatrixXf getGradient(Node* name) { return _gradients[name]; }
+		std::vector<Node*>& getOutputs() { return _outputs; }
+		std::vector<Node*> getInputs() { return _inputs; }
+		std::string name() { return _name; }
 
 	protected:
 		Eigen::MatrixXf _value;
 		std::vector<Node*> _inputs;
 		std::vector<Node*> _outputs;
 		std::map<Node*, Eigen::MatrixXf> _gradients;
+		std::string _name;
 	};
 
-	class Input : public Node {//此类等价于placeholder
+	class DLL_EXPORT Input : public Node {//此类等价于placeholder
 	public:
 		Input(const char* name/*, const std::vector<Node*>& inputs*/);
 
@@ -48,11 +60,10 @@ namespace engine {
 		virtual void backward();
 
 	private:
-		std::string _name;
 		Eigen::MatrixXf _value;
 	};
 
-	class Linear : public Node {
+	class DLL_EXPORT Linear : public Node {
 	public:
 		Linear(Node* nodes, Node* weights, Node* bias);
 
@@ -66,7 +77,7 @@ namespace engine {
 		Node* _bias = nullptr;
 	};
 
-	class Sigmoid : public Node {
+	class DLL_EXPORT Sigmoid : public Node {
 	public:
 		Sigmoid(Node* node);
 
@@ -82,7 +93,7 @@ namespace engine {
 		Eigen::MatrixXf _partial;
 	};
 
-	class MSE : public Node {
+	class DLL_EXPORT MSE : public Node {
 	public:
 		MSE(Node* y, Node* y_hat);
 
@@ -94,4 +105,7 @@ namespace engine {
 		Node* _y_hat;
 		Eigen::MatrixXf _diff;
 	};
-}
+
+	DLL_EXPORT std::vector<Node*> topological_sort(Node* input_nodes);
+
+}// namespace engine

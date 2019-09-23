@@ -12,3 +12,4 @@ set(TEST_SOURCE EngineTest.cpp)
 
 add_executable(${PROJECT_NAME} ${TEST_SOURCE})
 
+target_link_libraries(${PROJECT_NAME} MiniEngine)
