@@ -51,16 +51,13 @@ namespace engine {
 		std::string _name;
 	};
 
-	class DLL_EXPORT Input : public Node {//´ËÀàµÈ¼ÛÓÚplaceholder
+	class DLL_EXPORT Input : public Node {//æ­¤ç±»ç­‰ä»·äºplaceholder
 	public:
 		Input(const char* name/*, const std::vector<Node*>& inputs*/);
 
 		virtual void forward(const Eigen::MatrixXf& value);
 
 		virtual void backward();
-
-	private:
-		Eigen::MatrixXf _value;
 	};
 
 	class DLL_EXPORT Linear : public Node {
@@ -89,7 +86,7 @@ namespace engine {
 
 	private:
 		Node* _node = nullptr;
-		//sigmoidµÄÆ«µ¼
+		//sigmoidçš„åå¯¼
 		Eigen::MatrixXf _partial;
 	};
 

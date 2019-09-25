@@ -6,10 +6,13 @@
 #include <Eigen/Core>
 #endif
 #include <iostream>
+#include <algorithm>
+#include <random>
 
 #define BOSTON_DATA_SIZE	506
+#define BOSTON_DATA_FEATURE	13
 
-float boston_x[BOSTON_DATA_SIZE][13] = { {0.00632,18.,2.31,0.,0.538,6.575,65.2,4.09,1.,296.,15.3,396.9,4.98},
+float boston_x[BOSTON_DATA_SIZE][BOSTON_DATA_FEATURE] = { {0.00632,18.,2.31,0.,0.538,6.575,65.2,4.09,1.,296.,15.3,396.9,4.98},
 {0.02731,0.,7.07,0.,0.469,6.421,78.9,4.9671,2.,242.,17.8,396.9,9.14},
 {0.02729,0.,7.07,0.,0.469,7.185,61.1,4.9671,2.,242.,17.8,392.83,4.03},
 {0.03237,0.,2.18,0.,0.458,6.998,45.8,6.0622,3.,222.,18.7,394.63,2.94},
@@ -552,12 +555,36 @@ float boston_y[BOSTON_DATA_SIZE] = { 24.,21.6,34.7,33.4,36.2,28.7,22.9,27.1,16.5
 19.1,20.6,15.2,7.,8.1,13.6,20.1,21.8,24.5,23.1,19.7,18.3,21.2,17.5,16.8,
 22.4,20.6,23.9,22.,11.9 };
 
+std::pair<Eigen::MatrixXf, Eigen::MatrixXf> resample(const Eigen::MatrixXf& data,const Eigen::MatrixXf& labels) {
+	size_t dataLen = data.rows();
+	Eigen::PermutationMatrix<Eigen::Dynamic, Eigen::Dynamic> perm(dataLen);
+	perm.setIdentity();
+	std::shuffle(perm.indices().data(), perm.indices().data() + perm.indices().size(),std::default_random_engine());
+	Eigen::MatrixXf samples = perm * data;
+	Eigen::MatrixXf targets = perm * labels;
+	return std::make_pair(samples,targets);
+}
+
 int main() {
 	using namespace  std;
+	//Init
+	Eigen::MatrixXf inputs(BOSTON_DATA_SIZE, BOSTON_DATA_FEATURE);
+	for (int row = 0;row<BOSTON_DATA_SIZE;++row)
+	{
+		for (int col = 0; col < BOSTON_DATA_FEATURE; ++col) {
+			inputs(row,col) = boston_x[row][col];
+		}
+	}
+	Eigen::MatrixXf labels(BOSTON_DATA_SIZE, 1);
+	for (int row = 0; row < BOSTON_DATA_SIZE; ++row)
+	{
+		labels(row, 0) = boston_y[row];
+	}
+	auto samples = resample(inputs, labels);
 
 	using namespace engine;
 	Input X("X"),y("y"),W1("W1"),W2("W2"),b1("b1"),b2("b2");
-	//¹¹ÔìÁ¬½Ó¹ØÏµ
+	//æž„é€ è¿žæŽ¥å…³ç³»
 	auto linear1 = Linear(&X, &W1, &b1);
 	auto out = Sigmoid(&linear1);
 	auto y_hat = Linear(&out, &W2, &b2);
@@ -571,8 +598,13 @@ int main() {
 	int steps_per_epoch = BOSTON_DATA_SIZE/batch_size;
 
 	for (auto epoch = 0; epoch < epochs; ++epoch) {
-		for (auto batch = 0; batch < steps_per_epoch; ++batch) {
+		for (size_t batch = 0; batch < steps_per_epoch; ++batch) {
+			auto batch_x = samples.first.block(batch * batch_size, 0, batch_size, BOSTON_DATA_FEATURE);
+			auto batch_y = samples.second.block(batch * batch_size, 0, batch_size, 1);
+			X.setValue(batch_x);
+			y.setValue(batch_y);
 
+			train_one_batch(graph);
 		}
 	}
 }

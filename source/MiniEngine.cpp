@@ -38,7 +38,7 @@ namespace engine {
 		for (auto node : _outputs) {
 			auto grad = node->getGradient(this);
 			_gradients[_weights] = _nodes->getValue().transpose() * grad;
-			//°´ÁĞÇóºÍ,±äÎªÒ»ĞĞ
+			//æŒ‰åˆ—æ±‚å’Œ,å˜ä¸ºä¸€è¡Œ
 			_gradients[_bias] = grad.colwise().sum();
 			_gradients[_nodes] = grad * _weights->getValue().transpose();
 		}
@@ -97,30 +97,30 @@ namespace engine {
 
 	std::vector<Node*> topological_sort(Node* input_nodes)
 	{
-		//¸ù¾İ´«ÈëµÄÊı¾İ³õÊ¼»¯Í¼½á¹¹
+		//æ ¹æ®ä¼ å…¥çš„æ•°æ®åˆå§‹åŒ–å›¾ç»“æ„
 		Node* pNode = nullptr;
-		//pairµÚÒ»¸öÎªÊäÈë,µÚ¶ş¸öÎªÊä³ö
+		//pairç¬¬ä¸€ä¸ªä¸ºè¾“å…¥,ç¬¬äºŒä¸ªä¸ºè¾“å‡º
 		std::map < Node*, std::pair<std::set<Node*>, std::set<Node*> > > g;
-		//´ı±éÀúµÄÖÜÎ§½Úµã
+		//å¾…éå†çš„å‘¨å›´èŠ‚ç‚¹
 		std::list<Node*> vNodes;
 		vNodes.emplace_back(input_nodes);
-		//¹ã¶È±éÀú,ÏÈ±éÀúÊä³ö½Úµã,ÔÙ±éÀúÊäÈë½Úµã
-		//ÒÑ¾­±éÀú¹ıµÄ½Úµã
+		//å¹¿åº¦éå†,å…ˆéå†è¾“å‡ºèŠ‚ç‚¹,å†éå†è¾“å…¥èŠ‚ç‚¹
+		//å·²ç»éå†è¿‡çš„èŠ‚ç‚¹
 		std::set<Node*> sVisited;
 		while (vNodes.size() && (pNode = vNodes.front())) {
 			if (sVisited.find(pNode) != sVisited.end()) vNodes.pop_front();
 			const auto& outputs = pNode->getOutputs();
 			for (auto item: outputs)
 			{
-				g[pNode].second.insert(item);	//Ìí¼ÓitemÎªpnodeµÄÊä³ö½Úµã
-				g[item].first.insert(pNode);	//Ìí¼ÓpnodeÎªitemµÄÊäÈë½Úµã
-				if(sVisited.find(item)==sVisited.end()) vNodes.emplace_back(item);	//°ÑÃ»ÓĞ·ÃÎÊ¹ıµÄ½ÚµãÌí¼Óµ½´ı·ÃÎÊ¶ÓÁĞÖĞ
+				g[pNode].second.insert(item);	//æ·»åŠ itemä¸ºpnodeçš„è¾“å‡ºèŠ‚ç‚¹
+				g[item].first.insert(pNode);	//æ·»åŠ pnodeä¸ºitemçš„è¾“å…¥èŠ‚ç‚¹
+				if(sVisited.find(item)==sVisited.end()) vNodes.emplace_back(item);	//æŠŠæ²¡æœ‰è®¿é—®è¿‡çš„èŠ‚ç‚¹æ·»åŠ åˆ°å¾…è®¿é—®é˜Ÿåˆ—ä¸­
 			}
 			const auto& inputs = pNode->getInputs();
 			for (auto item: inputs)
 			{
-				g[pNode].first.insert(item);	//Ìí¼ÓitemÎªpnodeµÄÊäÈë½Úµã
-				g[item].second.insert(pNode);	//Ìí¼ÓpnodeÎªitemµÄÊä³ö½Úµã
+				g[pNode].first.insert(item);	//æ·»åŠ itemä¸ºpnodeçš„è¾“å…¥èŠ‚ç‚¹
+				g[item].second.insert(pNode);	//æ·»åŠ pnodeä¸ºitemçš„è¾“å‡ºèŠ‚ç‚¹
 				if (sVisited.find(item) == sVisited.end()) vNodes.emplace_back(item);
 			}
 			//std::cout << pNode->name() << std::endl;
@@ -128,22 +128,22 @@ namespace engine {
 			vNodes.pop_front();
 		}
 
-		//¸ù¾İÍ¼½á¹¹½øĞĞÍØÆËÅÅĞò
+		//æ ¹æ®å›¾ç»“æ„è¿›è¡Œæ‹“æ‰‘æ’åº
 		std::vector<Node*> vSorted;
 		while (g.size()) {
 			for (auto itr=g.begin();itr!=g.end();++itr)
 			{
-				//Ã»ÓĞÊäÈë½Úµã
+				//æ²¡æœ‰è¾“å…¥èŠ‚ç‚¹
 				auto& f = g[itr->first];
 				if (f.first.size() == 0) {
 					vSorted.push_back(itr->first);
-					//ÕÒµ½Í¼ÖĞÕâ¸ö½ÚµãµÄÊä³ö½Úµã£¬È»ºó½«Êä³ö½Úµã¶ÔÓ¦µÄÕâ¸ö¸¸½ÚµãÒÆ³ı
+					//æ‰¾åˆ°å›¾ä¸­è¿™ä¸ªèŠ‚ç‚¹çš„è¾“å‡ºèŠ‚ç‚¹ï¼Œç„¶åå°†è¾“å‡ºèŠ‚ç‚¹å¯¹åº”çš„è¿™ä¸ªçˆ¶èŠ‚ç‚¹ç§»é™¤
 					auto outputs = f.second;//f['out']
 					for (auto& output: outputs)
 					{
 						g[output].first.erase(itr->first);
 					}
-					//È»ºó½«Õâ¸ö½Úµã´ÓÍ¼ÖĞÒÆ³ı
+					//ç„¶åå°†è¿™ä¸ªèŠ‚ç‚¹ä»å›¾ä¸­ç§»é™¤
 					g.erase(itr->first);
 					break;
 				}
@@ -154,7 +154,9 @@ namespace engine {
 
 	DLL_EXPORT void train_one_batch(std::vector<Node*>& graph)
 	{
-
+		for (auto node:graph)
+		{
+		}
 	}
 
 	DLL_EXPORT void sgd_update(Node* startNode)
