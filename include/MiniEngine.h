@@ -29,7 +29,7 @@ namespace engine {
 		}
 		virtual ~Node() {}
 
-		virtual void forward(const Eigen::MatrixXf& value) = 0;
+		virtual void forward(/*const Eigen::MatrixXf& value*/) = 0;
 
 		virtual void backward() = 0;
 
@@ -53,9 +53,9 @@ namespace engine {
 
 	class DLL_EXPORT Input : public Node {//此类等价于placeholder
 	public:
-		Input(const char* name/*, const std::vector<Node*>& inputs*/);
+		Input(const char* name,size_t rows=0,size_t cols=0);
 
-		virtual void forward(const Eigen::MatrixXf& value);
+		virtual void forward(/*const Eigen::MatrixXf& value*/);
 
 		virtual void backward();
 	};
@@ -64,7 +64,7 @@ namespace engine {
 	public:
 		Linear(Node* nodes, Node* weights, Node* bias);
 
-		virtual void forward(const Eigen::MatrixXf& value);
+		virtual void forward(/*const Eigen::MatrixXf& value*/);
 
 		virtual void backward();
 
@@ -78,7 +78,7 @@ namespace engine {
 	public:
 		Sigmoid(Node* node);
 
-		virtual void forward(const Eigen::MatrixXf& value);
+		virtual void forward(/*const Eigen::MatrixXf& value*/);
 		virtual void backward();
 
 	private:
@@ -94,7 +94,7 @@ namespace engine {
 	public:
 		MSE(Node* y, Node* y_hat);
 
-		virtual void forward(const Eigen::MatrixXf& value);
+		virtual void forward(/*const Eigen::MatrixXf& value*/);
 		virtual void backward();
 
 	private:
@@ -107,6 +107,6 @@ namespace engine {
 
 	DLL_EXPORT void train_one_batch(std::vector<Node*>& graph);
 
-	DLL_EXPORT void sgd_update(Node* startNode);
+	DLL_EXPORT void sgd_update(std::vector<Node*> update_nodes, float learning_rate = 1e-2);
 
 }// namespace engine

@@ -1,16 +1,19 @@
 #include "MiniEngine.h"
 #include <map>
 #include <set>
+#include <iostream>
 
 namespace engine {
 
-	Input::Input(const char* name/*, const std::vector<Node* >& inputs*/)
+	Input::Input(const char* name,size_t rows,size_t cols)
 	{
 		_name = name;
+		//随机初始化权重和bias
+		_value = Eigen::MatrixXf(rows, cols).setRandom();
 	}
 
-	void Input::forward(const Eigen::MatrixXf& value) {
-		_value = value;
+	void Input::forward(/*const Eigen::MatrixXf& value*/) {
+		//_value = value;
 	}
 
 	void Input::backward() {
@@ -28,8 +31,11 @@ namespace engine {
 		_name = "Linear";
 	}
 
-	void Linear::forward(const Eigen::MatrixXf& )
+	void Linear::forward(/*const Eigen::MatrixXf&*/ )
 	{
+		//std::cout <<"Linear: "<< _nodes->getValue().rows() <<", "<< _nodes->getValue().cols() 
+		//	<<"\tWeight: "<< _weights->getValue().rows()<<", "<< _weights->getValue().cols()
+		//	<<"\tBias: "<< _bias->getValue().rows()<<", "<< _bias->getValue().cols()<< std::endl;
 		_value = _nodes->getValue() * _weights->getValue() + _bias->getValue();
 	}
 
@@ -37,6 +43,8 @@ namespace engine {
 	{
 		for (auto node : _outputs) {
 			auto grad = node->getGradient(this);
+			//std::cout << "Linear backward: " << _nodes->getValue().rows() << ", " << _nodes->getValue().cols()
+			//	<< "\tgrad: " << grad.rows() << ", " << grad.cols() << std::endl;
 			_gradients[_weights] = _nodes->getValue().transpose() * grad;
 			//按列求和,变为一行
 			_gradients[_bias] = grad.colwise().sum();
@@ -51,7 +59,7 @@ namespace engine {
 		_name = "Sigmoid";
 	}
 
-	void Sigmoid::forward(const Eigen::MatrixXf& )
+	void Sigmoid::forward(/*const Eigen::MatrixXf&*/ )
 	{
 		_value = _impl(_node->getValue());
 	}
@@ -59,11 +67,16 @@ namespace engine {
 	void Sigmoid::backward()
 	{
 		auto y = _value;
-		_partial = y-y*y;
+		//std::cout << "Sigmoid backward: y " << y.rows() << ", " << y.cols() << std::endl;
+		auto y2 = y.cwiseProduct(y);
+		//std::cout << y2.rows() << ", " << y2.cols() << std::endl;
+		_partial = y-Eigen::MatrixXf(y2);
 
 		for (auto node : _outputs) {
 			auto grad = node->getGradient(this);
-			_gradients[_node] = grad * _partial;
+			//std::cout << "Sigmoid: " << grad.rows() << ", " << grad.cols()
+			//	<< "\t partial: " << _partial.rows() << ", " << _partial.cols() << std::endl;
+			_gradients[_node] = grad.cwiseProduct(_partial);
 		}
 	}
 
@@ -79,11 +92,15 @@ namespace engine {
 		_name = "MSE";
 	}
 
-	void MSE::forward(const Eigen::MatrixXf& value)
+	void MSE::forward(/*const Eigen::MatrixXf& value*/)
 	{
+		//std::cout << "MSE: y " << _y->getValue().rows() << ", " << _y->getValue().cols() 
+		//	<< "\ty " << _y_hat->getValue().rows() << ", " << _y_hat->getValue().cols()<<  std::endl;
 		_diff = _y->getValue() - _y_hat->getValue();
+		//std::cout << "MSE: " << _diff.rows() << ", " << _diff.cols() << std::endl;
+		auto diff2= _diff.cwiseProduct(_diff);
 		auto v = Eigen::MatrixXf(1, 1);
-		v<<(_diff * _diff).mean();
+		v << (diff2).mean();
 		_value = v;
 	}
 
@@ -156,12 +173,22 @@ namespace engine {
 	{
 		for (auto node:graph)
 		{
+			node->forward();
+		}
+		for (int idx = graph.size() - 1; idx >= 0;--idx) {
+			graph[idx]->backward();
 		}
 	}
 
-	DLL_EXPORT void sgd_update(Node* startNode)
+	DLL_EXPORT void sgd_update(std::vector<Node*> update_nodes, float learning_rate)
 	{
-
+		for (auto node: update_nodes)
+		{
+			Eigen::MatrixXf delta = -1 * learning_rate * node->getGradient(node);
+			std::cout << node->name()<<": "<< node->getValue().rows()<<", "<< node->getValue().cols()
+				<<"\tDelta: "<<delta.rows() << ", " << delta.cols() << std::endl;
+			node->setValue(node->getValue() + delta);
+		}
 	}
 
 }

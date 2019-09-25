@@ -582,22 +582,27 @@ int main() {
 	}
 	auto samples = resample(inputs, labels);
 
+	int epochs = 5000;
+	int batch_size = 64;
+	int steps_per_epoch = BOSTON_DATA_SIZE / batch_size;
+
 	using namespace engine;
-	Input X("X"),y("y"),W1("W1"),W2("W2"),b1("b1"),b2("b2");
+	Input X("X"), y("y");
+	Input W1("W1", BOSTON_DATA_FEATURE, 512), b1("b1", batch_size, 512);
+	Input W2("W2",512, 1), b2("b2", batch_size, 1);
 	//构造连接关系
 	auto linear1 = Linear(&X, &W1, &b1);
 	auto out = Sigmoid(&linear1);
 	auto y_hat = Linear(&out, &W2, &b2);
-	auto loss = MSE(&y,&y_hat);
+	auto mse = MSE(&y,&y_hat);
 
 	auto graph = topological_sort(&X);
 
 	//losses = []
-	int epochs = 5000;
-	int batch_size = 64;
-	int steps_per_epoch = BOSTON_DATA_SIZE/batch_size;
 
 	for (auto epoch = 0; epoch < epochs; ++epoch) {
+		Eigen::MatrixXf loss(1,1);
+		loss.setZero();
 		for (size_t batch = 0; batch < steps_per_epoch; ++batch) {
 			auto batch_x = samples.first.block(batch * batch_size, 0, batch_size, BOSTON_DATA_FEATURE);
 			auto batch_y = samples.second.block(batch * batch_size, 0, batch_size, 1);
@@ -605,6 +610,9 @@ int main() {
 			y.setValue(batch_y);
 
 			train_one_batch(graph);
+			sgd_update({&W1, & W2, & b1, & b2});
+
+			loss+=graph[graph.size() - 1]->getValue();
 		}
 	}
 }
