@@ -45,7 +45,10 @@ namespace engine {
 		//std::cout <<"Linear: "<< _nodes->getValue().rows() <<", "<< _nodes->getValue().cols() 
 		//	<<"\tWeight: "<< _weights->getValue().rows()<<", "<< _weights->getValue().cols()
 		//	<<"\tBias: "<< _bias->getValue().rows()<<", "<< _bias->getValue().cols()<< std::endl;
-		_value = _nodes->getValue() * _weights->getValue() + _bias->getValue();
+		//广播
+		//auto WX = _nodes->getValue() * _weights->getValue();
+		//Eigen::VectorXf vec(_bias->getValue());
+		_value = (_nodes->getValue() * _weights->getValue()).rowwise() + Eigen::VectorXf(_bias->getValue()).transpose();
 	}
 
 	void Linear::backward()
@@ -56,10 +59,11 @@ namespace engine {
 			//	<< "\tgrad: " << grad.rows() << ", " << grad.cols() << std::endl;
 			_gradients[_weights] = _nodes->getValue().transpose() * grad;
 			//按列求和,变为一行
-			_gradients[_bias] = grad;// .rowwise().sum();
+			//_gradients[_bias] = grad;// .rowwise().sum();
 			//std::cout << "Linear backward: " << _nodes->getValue().rows() << ", " << _nodes->getValue().cols()
 			//	<< "\tgrad: " << _gradients[_bias].rows() << ", " << _gradients[_bias].cols() << std::endl;
-			//_gradients[_bias] = grad.colwise().sum();
+			_gradients[_bias] = grad.colwise().sum().transpose();
+			//std::cout << "grad: " << grad.rows() << ", " << grad.cols() << "\tbias: " << _gradients[_bias].rows() << ", " << _gradients[_bias].cols() << std::endl;
 			_gradients[_nodes] = grad * _weights->getValue().transpose();
 		}
 	}
@@ -203,6 +207,7 @@ namespace engine {
 		{
 			Eigen::MatrixXf delta = -1 * learning_rate * node->getGradient(node);
 			//std::cout << node->name()<<": "<< node->getValue().rows()<<", "<< node->getValue().cols()
+			//	<< ", Delta: " << delta.rows()<<", "<< delta.cols() << std::endl;
 			//Eigen::IOFormat HeavyFmt(Eigen::FullPrecision, 0, ", ", ";\n", "[", "]", "[", "]");
 			//std::cout <<"node "<<node->name()<<", Delta: \n"<<delta.format(HeavyFmt) << std::endl;
 			node->setValue(node->getValue() + delta);
