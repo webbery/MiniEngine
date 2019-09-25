@@ -38,7 +38,7 @@ namespace engine {
 
 	public:
 		void addNode2Output(Node* pNode) { _outputs.emplace_back(pNode); }
-		Eigen::MatrixXf getGradient(Node* name) { return _gradients[name]; }
+		Eigen::MatrixXf getGradient(Node* name);
 		std::vector<Node*>& getOutputs() { return _outputs; }
 		std::vector<Node*> getInputs() { return _inputs; }
 		std::string name() { return _name; }

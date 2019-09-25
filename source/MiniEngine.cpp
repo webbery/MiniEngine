@@ -4,12 +4,17 @@
 #include <iostream>
 
 namespace engine {
-
+	Eigen::MatrixXf Node::getGradient(Node* name)
+	{
+		//std::cout << _name << std::endl;
+		return _gradients[name];
+	}
 	Input::Input(const char* name,size_t rows,size_t cols)
 	{
 		_name = name;
-		//随机初始化权重和bias
+		//随机初始化
 		_value = Eigen::MatrixXf(rows, cols).setRandom();
+		_gradients[this] = Eigen::MatrixXf(rows, cols).setRandom();
 	}
 
 	void Input::forward(/*const Eigen::MatrixXf& value*/) {
@@ -18,7 +23,10 @@ namespace engine {
 
 	void Input::backward() {
 		for (auto node : _outputs) {
+			//std::cout << node->name() << std::endl;
 			_gradients[this] = node->getGradient(this);
+			//std::cout << _gradients[this] << std::endl;
+			//std::cout << "Input " << node->name() << ": " << _gradients[this].rows() << ", " << _gradients[this].cols() << std::endl;
 		}
 	}
 
@@ -29,6 +37,7 @@ namespace engine {
 		,_bias(bias)
 	{
 		_name = "Linear";
+		//_gradients[this] = Eigen::MatrixXf(rows, cols).setRandom();
 	}
 
 	void Linear::forward(/*const Eigen::MatrixXf&*/ )
@@ -47,7 +56,10 @@ namespace engine {
 			//	<< "\tgrad: " << grad.rows() << ", " << grad.cols() << std::endl;
 			_gradients[_weights] = _nodes->getValue().transpose() * grad;
 			//按列求和,变为一行
-			_gradients[_bias] = grad.colwise().sum();
+			_gradients[_bias] = grad;// .rowwise().sum();
+			//std::cout << "Linear backward: " << _nodes->getValue().rows() << ", " << _nodes->getValue().cols()
+			//	<< "\tgrad: " << _gradients[_bias].rows() << ", " << _gradients[_bias].cols() << std::endl;
+			//_gradients[_bias] = grad.colwise().sum();
 			_gradients[_nodes] = grad * _weights->getValue().transpose();
 		}
 	}
@@ -70,7 +82,7 @@ namespace engine {
 		//std::cout << "Sigmoid backward: y " << y.rows() << ", " << y.cols() << std::endl;
 		auto y2 = y.cwiseProduct(y);
 		//std::cout << y2.rows() << ", " << y2.cols() << std::endl;
-		_partial = y-Eigen::MatrixXf(y2);
+		_partial = y-y2;
 
 		for (auto node : _outputs) {
 			auto grad = node->getGradient(this);
@@ -82,7 +94,8 @@ namespace engine {
 
 	Eigen::MatrixXf Sigmoid::_impl(const Eigen::MatrixXf& x)
 	{
-		return (x.array().exp() + 1).inverse();
+		return (-x.array().exp() + 1).inverse();
+		//return 1.f / (1.f + exp(-x));
 	}
 
 	MSE::MSE(Node* y, Node* y_hat)
@@ -107,8 +120,12 @@ namespace engine {
 	void MSE::backward()
 	{
 		auto r = _y_hat->getValue().rows();
-		_gradients[_y] = _diff * (2 / r);
-		_gradients[_y_hat] = _diff * (-2 / r);
+		//std::cout << "R: "<<r<<"----\n"<<_diff << std::endl;
+		//反向传播的起点
+		_gradients[_y] = _diff * (2.f / r);
+		//std::cout << "======y========\n"<< _gradients[_y];
+		_gradients[_y_hat] = _diff * (-2.f / r);
+		//std::cout << "\n=======y_hat=======\n"<< _gradients[_y_hat];
 	}
 
 
@@ -185,8 +202,9 @@ namespace engine {
 		for (auto node: update_nodes)
 		{
 			Eigen::MatrixXf delta = -1 * learning_rate * node->getGradient(node);
-			std::cout << node->name()<<": "<< node->getValue().rows()<<", "<< node->getValue().cols()
-				<<"\tDelta: "<<delta.rows() << ", " << delta.cols() << std::endl;
+			//std::cout << node->name()<<": "<< node->getValue().rows()<<", "<< node->getValue().cols()
+			//Eigen::IOFormat HeavyFmt(Eigen::FullPrecision, 0, ", ", ";\n", "[", "]", "[", "]");
+			//std::cout <<"node "<<node->name()<<", Delta: \n"<<delta.format(HeavyFmt) << std::endl;
 			node->setValue(node->getValue() + delta);
 		}
 	}

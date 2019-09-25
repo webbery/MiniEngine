@@ -584,12 +584,14 @@ int main() {
 
 	int epochs = 5000;
 	int batch_size = 64;
+	//int batch_size = 1;
 	int steps_per_epoch = BOSTON_DATA_SIZE / batch_size;
 
+#define HIDDEN_SIZE 512
 	using namespace engine;
 	Input X("X"), y("y");
-	Input W1("W1", BOSTON_DATA_FEATURE, 512), b1("b1", batch_size, 512);
-	Input W2("W2",512, 1), b2("b2", batch_size, 1);
+	Input W1("W1", BOSTON_DATA_FEATURE, HIDDEN_SIZE), b1("b1", batch_size, HIDDEN_SIZE);
+	Input W2("W2", HIDDEN_SIZE, 1), b2("b2", batch_size, 1);
 	//构造连接关系
 	auto linear1 = Linear(&X, &W1, &b1);
 	auto out = Sigmoid(&linear1);
@@ -612,7 +614,11 @@ int main() {
 			train_one_batch(graph);
 			sgd_update({&W1, & W2, & b1, & b2});
 
+			//std::cout << graph[graph.size() - 1]->getValue().rows() << "," << graph[graph.size() - 1]->getValue().cols() << std::endl;
 			loss+=graph[graph.size() - 1]->getValue();
 		}
+		//if (epoch % 100 == 0) {
+			std::cout << "epoch " << epoch << ": loss " << loss(0, 0) << std::endl;
+		//}
 	}
 }
