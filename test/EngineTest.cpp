@@ -5,6 +5,9 @@
 #else
 #include <Eigen/Core>
 #endif
+#include "F/Sigmoid.h"
+#include "Layer/Linear.h"
+#include "Loss/MSE.h"
 #include <iostream>
 #include <algorithm>
 #include <random>
