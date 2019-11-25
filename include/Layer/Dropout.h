@@ -16,7 +16,8 @@ namespace engine {
 	private:
 		std::default_random_engine _generator;
 		std::bernoulli_distribution _distribution;
-		Eigen::Matrix2f _r;
+		Eigen::MatrixXf _r;
 		Node* _node = nullptr;
+		float _rescale = 0.5;
 	};
 }

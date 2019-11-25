@@ -8,6 +8,7 @@
 #include <string>
 #include <vector>
 #include <map>
+#include <iostream>
 
 #ifdef MiniEngine_EXPORTS
 #define DLL_EXPORT __declspec(dllexport)

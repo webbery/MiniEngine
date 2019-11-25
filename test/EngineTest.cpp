@@ -8,6 +8,7 @@
 #include "F/Sigmoid.h"
 #include "Layer/Linear.h"
 #include "Loss/MSE.h"
+#include "Layer/Dropout.h"
 #include <iostream>
 #include <algorithm>
 #include <random>
@@ -598,7 +599,9 @@ int main() {
 	//构造连接关系
 	auto linear1 = Linear(&X, &W1, &b1);
 	auto out = Sigmoid(&linear1);
-	auto y_hat = Linear(&out, &W2, &b2);
+	auto dropout = Dropout(&out);
+	//auto y_hat = Linear(&out, &W2, &b2);
+	auto y_hat = Linear(&dropout, &W2, &b2);
 	auto mse = MSE(&y,&y_hat);
 
 	auto graph = topological_sort(&X);
