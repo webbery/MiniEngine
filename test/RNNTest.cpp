@@ -10,12 +10,11 @@ int main() {
 	using namespace engine;
 	Input X("X"), y("y");
 	RNN y_hat(&X);
-	auto mse = MSE(&y, &y_hat);
+	auto loss = MSE(&y, &y_hat);
 	auto graph = topological_sort(&X);
 
 	for (auto epoch = 0; epoch < 2; ++epoch) {
-		Eigen::MatrixXf loss(1, 1);
-		loss.setZero();
+		loss.reset();
 		for (size_t batch = 0; batch < 2; ++batch) {
 			//X.setValue(batch_x);
 			//y.setValue(batch_y);
