@@ -3,8 +3,7 @@
 namespace engine {
 
 	MSE::MSE(Node* y, Node* y_hat)
-		:Node(std::vector<Node*>({ y,y_hat }))
-		, _y(y), _y_hat(y_hat)
+		:Loss(y,y_hat)
 	{
 		_name = "MSE";
 	}

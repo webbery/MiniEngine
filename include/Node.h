@@ -27,7 +27,7 @@ namespace engine {
 		}
 		virtual ~Node() {}
 
-		virtual void forward(/*const Eigen::MatrixXf& value*/) = 0;
+		virtual void forward() = 0;
 
 		virtual void backward() = 0;
 

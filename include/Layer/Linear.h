@@ -2,7 +2,7 @@
 #include "Node.h"
 
 namespace engine {
-	class DLL_EXPORT Linear : public Node {
+	class DLL_EXPORT Linear final: public Node {
 	public:
 		Linear(Node* nodes, Node* weights, Node* bias);
 

@@ -1,8 +1,8 @@
 #pragma once
-#include "Node.h"
+#include "Loss.h"
 
 namespace engine {
-	class DLL_EXPORT MSE : public Node {
+	class DLL_EXPORT MSE final: public Loss{
 	public:
 		MSE(Node* y, Node* y_hat);
 
@@ -10,8 +10,6 @@ namespace engine {
 		virtual void backward();
 
 	private:
-		Node* _y;
-		Node* _y_hat;
 		Eigen::MatrixXf _diff;
 	};
 }

@@ -1,10 +1,4 @@
 #include "MiniEngine.h"
-#ifdef __USE_OPENCL__
-#include <boost/compute.hpp>
-#include <boost/compute/interop/eigen.hpp>
-#else
-#include <Eigen/Core>
-#endif
 #include "F/Sigmoid.h"
 #include "Layer/Linear.h"
 #include "Loss/MSE.h"
@@ -602,15 +596,16 @@ int main() {
 	auto dropout = Dropout(&out);
 	//auto y_hat = Linear(&out, &W2, &b2);
 	auto y_hat = Linear(&dropout, &W2, &b2);
-	auto mse = MSE(&y,&y_hat);
+	auto loss = MSE(&y,&y_hat);
 
 	auto graph = topological_sort(&X);
 
 	//losses = []
 
 	for (auto epoch = 0; epoch < epochs; ++epoch) {
-		Eigen::MatrixXf loss(1,1);
-		loss.setZero();
+		//Eigen::MatrixXf loss(1,1);
+		//loss.setZero();
+		loss.reset();
 		for (size_t batch = 0; batch < steps_per_epoch; ++batch) {
 			auto batch_x = samples.first.block(batch * batch_size, 0, batch_size, BOSTON_DATA_FEATURE);
 			auto batch_y = samples.second.block(batch * batch_size, 0, batch_size, 1);
@@ -624,7 +619,7 @@ int main() {
 			loss+=graph[graph.size() - 1]->getValue();
 		}
 		//if (epoch % 100 == 0) {
-			std::cout << "epoch " << epoch << ": loss " << loss(0, 0)/ steps_per_epoch << std::endl;
+			std::cout << "epoch " << epoch << ": loss " << loss/ steps_per_epoch << std::endl;
 		//}
 	}
 }

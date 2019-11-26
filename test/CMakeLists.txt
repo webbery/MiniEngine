@@ -8,8 +8,9 @@ project(MiniEngineTest)
 #endif(Boost_FOUND)
 include_directories(../include ${EIGEN3_INCLUDE_DIR})
 
-set(TEST_SOURCE EngineTest.cpp)
+add_executable(mini_demo EngineTest.cpp)
+target_link_libraries(mini_demo MiniEngine)
 
-add_executable(${PROJECT_NAME} ${TEST_SOURCE})
+add_executable(test_rnn RNNTest.cpp)
+target_link_libraries(test_rnn MiniEngine)
 
-target_link_libraries(${PROJECT_NAME} MiniEngine)

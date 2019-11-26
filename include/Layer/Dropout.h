@@ -3,7 +3,7 @@
 #include <random>
 
 namespace engine {
-	class DLL_EXPORT Dropout : public Node {
+	class DLL_EXPORT Dropout final: public Node {
 	public:
 		Dropout(Node* nodes,float seed=0.5);
 
