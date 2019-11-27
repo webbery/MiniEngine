@@ -1,5 +1,5 @@
 #pragma once
-#include "Node.h"
+#include "Loss/Loss.h"
 
 namespace engine {
 	DLL_EXPORT void sgd_update(std::vector<Node*> update_nodes, float learning_rate);
@@ -8,7 +8,7 @@ namespace engine {
 	public:
 		void update(std::vector<Node*> update_nodes, float learning_rate);
 
-		void minimize(Node* loss);
+		void minimize(Loss* loss);
 	private:
 
 	};

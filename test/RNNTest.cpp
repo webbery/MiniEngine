@@ -3,11 +3,13 @@
 #include "Layer/Linear.h"
 #include "Loss/MSE.h"
 #include "Layer/GRU.h"
+#include "Util/Complex.h"
 #include <iostream>
 
 int main() {
 
 	using namespace engine;
+
 	Input X("X"), y("y");
 	RNN y_hat(&X);
 	auto loss = MSE(&y, &y_hat);

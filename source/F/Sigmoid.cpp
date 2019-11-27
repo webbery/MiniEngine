@@ -6,7 +6,7 @@ namespace engine {
 		:Node(std::vector<Node*>({ node }))
 		, _node(node)
 	{
-		_name = "Sigmoid";
+		_name = "sigmoid";
 	}
 
 	void Sigmoid::forward(/*const Eigen::MatrixXf&*/)

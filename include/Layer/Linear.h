@@ -10,6 +10,8 @@ namespace engine {
 
 		virtual void backward();
 
+		virtual void update(std::function<Node* (Node*)> executor);
+
 	private:
 		Node* _nodes = nullptr;
 		Node* _weights = nullptr;

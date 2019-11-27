@@ -3,6 +3,7 @@
 #include "Layer/Linear.h"
 #include "Loss/MSE.h"
 #include "Layer/Dropout.h"
+#include "Optim/SGD.h"
 #include <iostream>
 #include <algorithm>
 #include <random>
@@ -593,14 +594,14 @@ int main() {
 	//构造连接关系
 	auto linear1 = Linear(&X, &W1, &b1);
 	auto out = Sigmoid(&linear1);
-	auto dropout = Dropout(&out);
-	//auto y_hat = Linear(&out, &W2, &b2);
-	auto y_hat = Linear(&dropout, &W2, &b2);
+	//auto dropout = Dropout(&out);
+	auto y_hat = Linear(&out, &W2, &b2);
+	//auto y_hat = Linear(&dropout, &W2, &b2);
 	auto loss = MSE(&y,&y_hat);
 
 	auto graph = topological_sort(&X);
 
-	//losses = []
+	SGD sgd;
 
 	for (auto epoch = 0; epoch < epochs; ++epoch) {
 		//Eigen::MatrixXf loss(1,1);
@@ -613,7 +614,7 @@ int main() {
 			y.setValue(batch_y);
 
 			train_one_batch(graph);
-			sgd_update({&W1, & W2, & b1, & b2}, 1e-4);
+			sgd.update(graph, 1e-4);
 
 			//std::cout << graph[graph.size() - 1]->getValue().rows() << "," << graph[graph.size() - 1]->getValue().cols() << std::endl;
 			loss+=graph[graph.size() - 1]->getValue();

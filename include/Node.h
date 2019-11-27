@@ -16,6 +16,8 @@
 #define DLL_EXPORT __declspec(dllimport)
 #endif
 
+#pragma warning(disable:4251)
+
 namespace engine {
 	class DLL_EXPORT Node {
 	public:
@@ -29,7 +31,11 @@ namespace engine {
 
 		virtual void forward() = 0;
 
+		//反向计算梯度
 		virtual void backward() = 0;
+
+		//根据梯度进行参数更新
+		virtual void update(std::function<Node* (Node*)> executor) {}
 
 		Eigen::MatrixXf getValue() { return _value; }
 		void setValue(const Eigen::MatrixXf& value) { _value = value; }

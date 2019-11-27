@@ -38,4 +38,11 @@ namespace engine {
 			_gradients[_nodes] = grad * _weights->getValue().transpose();
 		}
 	}
+
+	void Linear::update(std::function<Node* (Node*)> executor)
+	{
+		_weights = executor(_weights);
+		_bias = executor(_bias);
+	}
+
 }
