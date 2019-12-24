@@ -20,7 +20,7 @@ namespace engine {
 		//std::cout << "Sigmoid backward: y " << y.rows() << ", " << y.cols() << std::endl;
 		auto y2 = y.cwiseProduct(y);
 		//std::cout << y2.rows() << ", " << y2.cols() << std::endl;
-		_partial = y - y2;
+		Eigen::MatrixXf _partial = y - y2;	//y(1-y)
 
 		for (auto node : _outputs) {
 			auto grad = node->getGradient(this);

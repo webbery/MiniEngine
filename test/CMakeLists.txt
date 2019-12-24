@@ -14,3 +14,5 @@ target_link_libraries(mini_demo MiniEngine)
 add_executable(test_rnn RNNTest.cpp)
 target_link_libraries(test_rnn MiniEngine)
 
+add_executable(test_classify ClassifyTest.cpp)
+target_link_libraries(test_classify MiniEngine)

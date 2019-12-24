@@ -14,7 +14,5 @@ namespace engine {
 
 	private:
 		Node* _node = nullptr;
-		//sigmoid的偏导
-		Eigen::MatrixXf _partial;
 	};
 }

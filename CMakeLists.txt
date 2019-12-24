@@ -7,6 +7,7 @@ aux_source_directory(source/F FunctionSource)
 aux_source_directory(source/Layer LayerSource)
 aux_source_directory(source/Loss LossSource)
 aux_source_directory(source/Optim OptimSource)
+aux_source_directory(source/Util UtilSource)
 
 set( BOOST_COMPONENTS_NEEDED compute )
 
@@ -81,7 +82,14 @@ find_package(Eigen3)
 message(${EIGEN3_INCLUDE_DIR})
 include_directories(include ${EIGEN3_INCLUDE_DIR})
 
-add_library(${PROJECT_NAME} SHARED ${EningeSource} ${FunctionSource} ${LayerSource} ${LossSource} ${OptimSource})
+add_library(${PROJECT_NAME} SHARED 
+	${EningeSource}
+	${FunctionSource}
+	${LayerSource}
+	${LossSource}
+	${OptimSource}
+	${UtilSource}
+)
 
 if(Boost_FOUND)
 message(boost_dir:${Boost_LIBRARIES})
