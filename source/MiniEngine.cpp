@@ -82,6 +82,11 @@ namespace engine {
 		return vSorted;
 	}
 
+	DLL_EXPORT std::vector<Node*> make_graph(Node* input_nodes)
+	{
+		return topological_sort(input_nodes);
+	}
+
 	DLL_EXPORT void train_one_batch(std::vector<Node*>& graph)
 	{
 		for (auto node:graph)

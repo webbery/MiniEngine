@@ -1,4 +1,5 @@
 #include "Loss/MSE.h"
+#include "Debug.h"
 
 namespace engine {
 
@@ -10,8 +11,8 @@ namespace engine {
 
 	void MSE::forward(/*const Eigen::MatrixXf& value*/)
 	{
-		//std::cout << "MSE: y " << _y->getValue().rows() << ", " << _y->getValue().cols() 
-		//	<< "\ty " << _y_hat->getValue().rows() << ", " << _y_hat->getValue().cols()<<  std::endl;
+		PRINT_SIZE(_y->getValue());
+		PRINT_SIZE(_y_hat->getValue());
 		_diff = _y->getValue() - _y_hat->getValue();
 		//std::cout << "MSE: " << _diff.rows() << ", " << _diff.cols() << std::endl;
 		auto diff2 = _diff.cwiseProduct(_diff);

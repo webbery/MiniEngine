@@ -43,7 +43,7 @@ namespace engine {
 		
 		for (size_t g = 0; g < centers; ++g) {
 			Eigen::MatrixXf blob(samples, features);
-			std::cout << vCenters[g][0] <<", "<< vCenters[g][1]<< std::endl;
+			//std::cout << vCenters[g][0] <<", "<< vCenters[g][1]<< std::endl;
 			for (size_t f = 0; f < features; ++f) {
 				std::normal_distribution<double> distribution(vCenters[g][f], pStd[g]);
 				for (int i = 0; i < samples; ++i) {
@@ -60,4 +60,13 @@ namespace engine {
 		return std::move(vSamples);
 	}
 
+	std::pair<Eigen::MatrixXf, Eigen::MatrixXf> resample(const Eigen::MatrixXf& data, const Eigen::MatrixXf& labels) {
+		size_t dataLen = data.rows();
+		Eigen::PermutationMatrix<Eigen::Dynamic, Eigen::Dynamic> perm(dataLen);
+		perm.setIdentity();
+		std::shuffle(perm.indices().data(), perm.indices().data() + perm.indices().size(), std::default_random_engine());
+		Eigen::MatrixXf samples = perm * data;
+		Eigen::MatrixXf targets = perm * labels;
+		return std::make_pair(samples, targets);
+	}
 }

@@ -1,4 +1,5 @@
 #include "Layer/Linear.h"
+#include "Debug.h"
 
 namespace engine {
 	Linear::Linear(Node* nodes, Node* weights, Node* bias)
@@ -13,13 +14,35 @@ namespace engine {
 
 	void Linear::forward(/*const Eigen::MatrixXf&*/)
 	{
-		//std::cout <<"Linear: "<< _nodes->getValue().rows() <<", "<< _nodes->getValue().cols() 
-		//	<<"\tWeight: "<< _weights->getValue().rows()<<", "<< _weights->getValue().cols()
-		//	<<"\tBias: "<< _bias->getValue().rows()<<", "<< _bias->getValue().cols()<< std::endl;
-		//广播
-		//auto WX = _nodes->getValue() * _weights->getValue();
-		//Eigen::VectorXf vec(_bias->getValue());
-		_value = (_nodes->getValue() * _weights->getValue()).rowwise() + Eigen::VectorXf(_bias->getValue()).transpose();
+		PRINT_SIZE(_nodes->getValue());
+		PRINT_SIZE(_bias->getValue());
+		PRINT_SIZE(_weights->getValue());
+		auto b = _bias->getValue();
+		if (b.cols() == 1) {
+			//广播
+			_value = (_nodes->getValue() * _weights->getValue()).rowwise() + Eigen::VectorXf(_bias->getValue()).transpose();
+		}
+		else {
+			Eigen::MatrixXf t(_nodes->getValue() * _weights->getValue());
+			size_t totalRows = t.rows() * b.cols();
+			Eigen::MatrixXf lmat(totalRows, t.cols());
+			PRINT_SIZE(lmat);
+			for (int i = 0; i < b.cols(); ++i) {
+				lmat.block(i * t.rows(), 0, t.rows(), t.cols()) = t;
+			}
+			auto r=b.transpose();
+			Eigen::MatrixXf rmat(totalRows, t.cols());
+			PRINT_SIZE(r);
+			for (int i = 0; i < b.cols(); ++i) {
+				Eigen::MatrixXf m(t.rows(), t.cols());
+				PRINT_SIZE(m);
+				for (size_t j = 0; j < t.rows(); ++j) {
+					m.row(j) = r.row(i);
+				}
+				rmat.block(i*t.rows(), 0, t.rows(), t.cols()) = m;
+			}
+			_value = lmat + rmat;
+		}
 	}
 
 	void Linear::backward()

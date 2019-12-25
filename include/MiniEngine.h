@@ -13,6 +13,7 @@ namespace engine {
 	};
 
 	DLL_EXPORT std::vector<Node*> topological_sort(Node* input_nodes);
+	DLL_EXPORT std::vector<Node*> make_graph(Node* input_nodes);
 
 	DLL_EXPORT void train_one_batch(std::vector<Node*>& graph);
 

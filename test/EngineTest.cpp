@@ -7,6 +7,7 @@
 #include <iostream>
 #include <algorithm>
 #include <random>
+#include "Util/Dataset.h"
 
 #define BOSTON_DATA_SIZE	506
 #define BOSTON_DATA_FEATURE	13
@@ -554,16 +555,6 @@ float boston_y[BOSTON_DATA_SIZE] = { 24.,21.6,34.7,33.4,36.2,28.7,22.9,27.1,16.5
 19.1,20.6,15.2,7.,8.1,13.6,20.1,21.8,24.5,23.1,19.7,18.3,21.2,17.5,16.8,
 22.4,20.6,23.9,22.,11.9 };
 
-std::pair<Eigen::MatrixXf, Eigen::MatrixXf> resample(const Eigen::MatrixXf& data,const Eigen::MatrixXf& labels) {
-	size_t dataLen = data.rows();
-	Eigen::PermutationMatrix<Eigen::Dynamic, Eigen::Dynamic> perm(dataLen);
-	perm.setIdentity();
-	std::shuffle(perm.indices().data(), perm.indices().data() + perm.indices().size(),std::default_random_engine());
-	Eigen::MatrixXf samples = perm * data;
-	Eigen::MatrixXf targets = perm * labels;
-	return std::make_pair(samples,targets);
-}
-
 int main() {
 	using namespace  std;
 	//Init
@@ -579,6 +570,7 @@ int main() {
 	{
 		labels(row, 0) = boston_y[row];
 	}
+	using namespace engine;
 	auto samples = resample(inputs, labels);
 
 	int epochs = 5000;
@@ -587,7 +579,6 @@ int main() {
 	int steps_per_epoch = BOSTON_DATA_SIZE / batch_size;
 
 #define HIDDEN_SIZE 10
-	using namespace engine;
 	Input X("X"), y("y");
 	Input W1("W1", BOSTON_DATA_FEATURE, HIDDEN_SIZE), b1("b1", HIDDEN_SIZE, 1);
 	Input W2("W2", HIDDEN_SIZE, 1), b2("b2", 1, 1);
